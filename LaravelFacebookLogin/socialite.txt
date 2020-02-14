@@ -1,0 +1,543 @@
+# Steps of login with facebook
+
+
+WEDNESDAY, FEBRUARY 12, 2020Contact UsPrivacy PolicyTerms Of ServiceAffiliate DisclosureAbout Us
+AppDividend
+
+HOMEPROGRAMMINGFRAMEWORKDATABASEMOBILECLOUD COMPUTINGDATA SCIENCEBLOCKCHAINMORE
+HomeLaravelLaravel 5 Facebook Login Tutorial
+LARAVEL
+Laravel 5 Facebook Login Tutorial
+By Krunal Last updated Feb 22, 2018
+ 55
+ Share
+Laravel 5 Facebook Login Tutorial is the tutorial title today we will deep dive.  I am going to show you how to Login users with Facebook and save them into your database using Laravel 5.4 I will guide you how to Integrate Facebook socialite login into your Laravel 5.4 application. So let us start.
+
+
+Primis Player Placeholder
+
+
+Step 1: Make a project of  Laravel Facebook Login.
+Content Overview [hide]
+
+1 Step 1: Make a project of  Laravel Facebook Login.
+2 Step 2: Create a Laravel Authentication
+3 Step 3: Download the laravel/socialite package for laravel 5 facebook integration
+4 Laravel 5 Facebook Login Tutorial
+5 Step 4: Create Facebook App To Get Tokens
+6 Possible Error: 
+7 Possible Solution: 
+8 Step 5: Generate a controller for Laravel Facebook Login
+9 Step 6: Create Login view file with blade templating engine.
+10 Possible Error:
+11 Possible Solution: 
+12 Step 7: Make one model for Social Account
+13 Step 8: Give relations to SocialFacebookAccount model.
+14 Step 9: Update callback function.
+15 Step 10: Make live your Laravel 5 Facebook Integration with the public.
+Create a Laravel 5.4 project by typing following command.
+
+Step 1:composer create-project laravel/laravel socialLogin --prefer-dist
+Go to that project and start the Laravel server by typing following command.
+
+php artisan serve
+Server starts at URL: http://localhost:8000
+
+You need to configure your database in .env file.
+
+Laravel 5.4 ships with by default two tables. So run the following command in your terminal after setting up with the database.
+
+php artisan migrate
+Two tables of users and password_reset tables and one migration table generated in MySQL Database
+
+Step 2: Create a Laravel Authentication
+Laravel Auth
+Laravel provides us basic authentication. Laravel 5.4 makes implementing authentication very simple. In fact, almost everything is configured for you out of the box.  We just need to fire one command in our terminal, and we are ready to go.
+
+php artisan make:auth
+You can see in the terminal that Authentication scaffolding generated successfully.
+
+Now, if we switch to the routes >> web.php file then there is one added route, and also our view is configured automatically.
+
+<?php 
+
+// web.php
+
+Auth::routes();
+Change to this URL: http://localhost:8000/login
+
+You can see something like this and yes, don’t forget to start the server all the time by firing command php artisan serve.
+
+Laravel 5.4 Socialite Facebook Login
+
+ 
+
+Step 3: Download the laravel/socialite package for laravel 5 facebook integration
+Laravel 5 Facebook Login Tutorial
+The socialite is a package that makes building authentification with traditional social networks simple. So we are using this Laravel 5.4 specific package.
+
+composer require laravel/socialite
+Now, add the service provider to the config/app.phpfile.
+
+<?php
+
+// app.php
+
+'providers' => [
+    // Other service providers...
+
+    Laravel\Socialite\SocialiteServiceProvider::class,
+],
+Moreover, also update an alias array
+
+<?php
+
+// app.php
+
+'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+
+Step 4: Create Facebook App To Get Tokens
+Go to the Facebook’s developers portal by following URL: https://developers.facebook.com/
+
+Login via your Facebook account. You will see something like this.
+
+Facebook Login
+
+ 
+
+You can see in the image that there is Create App button. So click that button, and you will find one pop up window like this.
+
+Create New App ID
+
+ 
+
+Here, I have put my name and email id in the popup and press button of Create App ID
+
+You will see your dashboard like this.
+
+Laravel 5 Facebook Login
+
+ 
+
+In your dashboard, you can see your App ID
+
+Now we need to select Facebook Login option from above image. So click that button, and you will redirect to Facebook Login Dashboard page. In this page, you can see your App ID and App Secret, which we need in our Laravel Application
+
+App ID: xxxxxxxxx
+App Secret: xxxxxxx
+Now, grab both of them and switch to your editor.
+
+Navigate to the config  >>  services.php file and put one another services array by the following code.
+
+Your App ID becomes your client_id, and App Secret becomes client_secret
+
+<?php
+
+// services.php
+
+'facebook' => [
+    'client_id' => 'xxxxxxx',
+    'client_secret' => 'xxxxxxxx',
+    'redirect' => '',
+],
+Possible Error: 
+When you try to login via facebook and if you have not added the domain in your Facebook app. You will get following error.
+
+Can’t load URL: The domain of this URL is not included in the app’s domains. To be able to load this URL, add all domains and sub-domains of your app to the App Domains field in your app settings.
+
+Possible Solution: 
+You need to add the platform to your Facebook dashboard and in that type your project’s root URL like this.
+
+Socialite Laravel 5 Facebook Login
+
+ 
+
+Step 5: Generate a controller for Laravel Facebook Login
+Now, we need to create one controller, which handles the Facebook Authentication routes.
+
+php artisan make:controller SocialAuthFacebookController
+We need to implement two methods in this controller, which are following.
+
+1)redirect():  Redirect our users to the Facebook.
+
+2) callback():  Handle callback from Facebook.
+
+<?php
+
+// SocialAuthFacebookController.php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Socialite;
+
+class SocialAuthFacebookController extends Controller
+{
+  /**
+   * Create a redirect method to facebook api.
+   *
+   * @return void
+   */
+    public function redirect()
+    {
+        return Socialite::driver('facebook')->redirect();
+    }
+
+    /**
+     * Return a callback method from facebook api.
+     *
+     * @return callback URL from facebook
+     */
+    public function callback()
+    {
+       
+    }
+}
+Next step is going to the routes >> web.php file and register the routes.
+
+<?php
+
+//web.php
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Auth::routes();
+
+Route::get('/redirect', 'SocialAuthFacebookController@redirect');
+Route::get('/callback', 'SocialAuthFacebookController@callback');
+
+Route::get('/home', 'HomeController@index')->name('home');
+Go to the config  >>  services.php file and update the Facebook keyed array with another key called redirect and put the value ‘http://localhost:8000/callback’
+
+<?php
+
+// services.php
+
+'facebook' => [
+    'client_id' => 'xxxxxxx',
+    'client_secret' => 'xxxxxxx',
+    'redirect' => 'http://localhost:8000/callback',
+],
+
+
+Step 6: Create Login view file with blade templating engine.
+Now we just need to add the link to our routeredirect which will further redirect the user to the Facebook. So go to the resources  >>  views  >>  auth  >>  login.blade.php and  add one link like Login with Facebook.
+
+<!-- login.blade.php -->
+
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-heading">Login</div>
+                <div class="panel-body">
+                    <form class="form-horizontal" method="POST" action="{{ route('login') }}">
+                        {{ csrf_field() }}
+
+                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
+                            <label for="email" class="col-md-4 control-label">E-Mail Address</label>
+
+                            <div class="col-md-6">
+                                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required autofocus>
+
+                                @if ($errors->has('email'))
+                                    <span class="help-block">
+                                        <strong>{{ $errors->first('email') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+                            <label for="password" class="col-md-4 control-label">Password</label>
+
+                            <div class="col-md-6">
+                                <input id="password" type="password" class="form-control" name="password" required>
+
+                                @if ($errors->has('password'))
+                                    <span class="help-block">
+                                        <strong>{{ $errors->first('password') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> Remember Me
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-8 col-md-offset-4">
+                                <button type="submit" class="btn btn-primary">
+                                    Login
+                                </button>
+
+                                <a class="btn btn-link" href="{{ route('password.request') }}">
+                                    Forgot Your Password?
+                                </a>
+                            </div>
+                        </div>
+                        <br />
+                        <p style="margin-left:265px">OR</p>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-8 col-md-offset-4">
+                              <a href="{{url('/redirect')}}" class="btn btn-primary">Login with Facebook</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+Now, if you have not started the server, then launch the server and go the following URL
+
+http://localhost:8000/login
+
+Try to login via Facebook and if everything sets up correctly.
+
+Possible Error:
+cURL error 60: SSL certificate problem: unable to get local issuer certificate
+
+Possible Solution: 
+Assuming On Windows
+
+XAMPP server
+
+Similar to another environment – download and extract for cacert.pem here (a clean file format/data)
+
+https://curl.haxx.se/docs/caextract.html  put it here
+
+C:\xampp\php\extras\ssl\cacert.pem in your php.ini put this line in this section (“c:\xampp\php\php.ini”):
+
+;;;;;;;;;;;;;;;;;;;;
+; php.ini Options  ;
+;;;;;;;;;;;;;;;;;;;;
+
+curl.cainfo = "C:\xampp\php\extras\ssl\cacert.pem"
+Moreover, finally, restart your server.
+
+Step 7: Make one model for Social Account
+Now, when you try to Log in with Facebook, you will redirect to nothing, and in your URL, you can see the callback with some code in it. So let’s fix that.
+
+Now, we are integrating our Facebook user in our Laravel application. Create one model as well as one migration in our app.
+
+ php artisan make:model SocialFacebookAccount -m
+Now, add the following code in create_social_facebook_accounts_table.php file. I am putting my final file in here.
+
+<?php
+
+// create_social_facebook_accounts.php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateSocialFacebookAccountsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('social_facebook_accounts', function (Blueprint $table) {
+          $table->integer('user_id');
+          $table->string('provider_user_id');
+          $table->string('provider');
+          $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('social_facebook_accounts');
+    }
+}
+Run the following command if you have migrated previous tables.
+
+php artisan migrate:refresh
+Alternatively, else, if this is your first-time migration then apply following command.
+
+php artisan migrate
+
+
+Step 8: Give relations to SocialFacebookAccount model.
+The column provider_user_id is Facebook’s user id, and inprovider this case, will always be Facebook
+
+Add relations and fillable to the  SocialFacebookAccount model.
+
+<?php
+
+// SocialFacebookAccount.php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class SocialFacebookAccount extends Model
+{
+  protected $fillable = ['user_id', 'provider_user_id', 'provider'];
+
+  public function user()
+  {
+      return $this->belongsTo(User::class);
+  }
+}
+Next step would be some handling service that will try to register the user or login if the account already exists. Create folderapp/Services. Laravel 5.4 has not any Services folder in app directory so create a directory first and put following content in that SocialFacebookAccountService.php file. So our full directory structure would look like this.
+
+app  >>  Services >> SocialFacebookAccountService.php
+
+<?php
+
+namespace App\Services;
+use App\SocialFacebookAccount;
+use App\User;
+use Laravel\Socialite\Contracts\User as ProviderUser;
+
+class SocialFacebookAccountService
+{
+    public function createOrGetUser(ProviderUser $providerUser)
+    {
+        $account = SocialFacebookAccount::whereProvider('facebook')
+            ->whereProviderUserId($providerUser->getId())
+            ->first();
+
+        if ($account) {
+            return $account->user;
+        } else {
+
+            $account = new SocialFacebookAccount([
+                'provider_user_id' => $providerUser->getId(),
+                'provider' => 'facebook'
+            ]);
+
+            $user = User::whereEmail($providerUser->getEmail())->first();
+
+            if (!$user) {
+
+                $user = User::create([
+                    'email' => $providerUser->getEmail(),
+                    'name' => $providerUser->getName(),
+                    'password' => md5(rand(1,10000)),
+                ]);
+            }
+
+            $account->user()->associate($user);
+            $account->save();
+
+            return $user;
+        }
+    }
+}
+It will try to find provider’s account in the system and if it is not present it will create a new user. This method will also try to associate the social account with the email address in case that user already has an account.
+
+Now everything is ready to handle Facebook’s callback to our app.
+
+
+Step 9: Update callback function.
+The last step is to update the SocialAuthFacebookController’s callback() function.
+
+<?php
+
+// SocialAuthFacebookController.php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Socialite;
+use App\Services\SocialFacebookAccountService;
+
+class SocialAuthFacebookController extends Controller
+{
+  /**
+   * Create a redirect method to facebook api.
+   *
+   * @return void
+   */
+    public function redirect()
+    {
+        return Socialite::driver('facebook')->redirect();
+    }
+
+    /**
+     * Return a callback method from facebook api.
+     *
+     * @return callback URL from facebook
+     */
+    public function callback(SocialFacebookAccountService $service)
+    {
+        $user = $service->createOrGetUser(Socialite::driver('facebook')->user());
+        auth()->login($user);
+        return redirect()->to('/home');
+    }
+}
+All the coding is now finally complete. Go to the login URL of our application.
+
+http://localhost:8000/login
+
+Now, Login with Facebook and you will redirect to the home page and the data has been saved in the database.
+
+login with facebook in laravel
+
+Step 10: Make live your Laravel 5 Facebook Integration with the public.
+Right now your application is in development mode, so when you try to login with another Facebook username and password then It will not work.
+
+For that, you need to do following the steps.
+
+STEP 1:
+
+Log in to Facebook Developer -> Your App
+
+In Settings -> Basic -> Contact Email. (Give any email)
+
+STEP 2:
+
+And in ‘App Review‘ Tab: change
+
+Do you want to make this app and all its live features available to the general public? Yes
+
+And your app will be live now.
+
+Now, you will be able to log in as any Facebook user.
+
+Github: https://github.com/KrunalLathiya/LaravelFacebookLogin
+Steps to use Github code
+Clone the repo in your local.
+Go to root of the project and run command “composer update“
+Edit .env file and use your MySQL database credentials.
+Configure developers facebook account get client_id and client_secret and also put your Web URL.
+Run the command “php artisan migrate“
+Now, we need to bootstrap Laravel server so run “php artisan serve“
+If now go to this URL: http://localhost:8000/login
+If you still have doubt in this Laravel Facebook Login Tutorial, then ask in the comment below, I am happy to help you out.

@@ -1,0 +1,5 @@
+# In Laravel Facebook Login Project i used laravel version 5.4 where i also build seperate table for provider and make reletionship also.
+
+# In Laravel Socialite Project i used laravel 5.8 version and do not make separate table for provider.
+
+# I used third party api such as fb,google and twitter for login functionality.
